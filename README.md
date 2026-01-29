@@ -1,62 +1,75 @@
-# 🫁 LungRadiomics: 2D/3D Radiomic Lung Nodule Classification
+# 🫁 LungRadiomics: Radiomic Lung Nodule Classification
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
-[![PyRadiomics](https://img.shields.io/badge/PyRadiomics-Feature_Extraction-orange.svg)](https://pyradiomics.readthedocs.io/)
-[![XGBoost](https://img.shields.io/badge/XGBoost-Ensemble_Learning-green.svg)](https://xgboost.readthedocs.io/)
-[![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-Machine_Learning-yellow.svg)](https://scikit-learn.org/)
+[![LIDC-IDRI](https://img.shields.io/badge/Dataset-LIDC--IDRI-lightgrey)](https://www.cancerimagingarchive.net/collection/lidc-idri/)
+[![XGBoost](https://img.shields.io/badge/Model-XGBoost-green)](https://xgboost.readthedocs.io/)
 
-## 🎯 Project Overview
-Lung cancer remains a leading cause of mortality, making early detection via Computer-Aided Diagnosis (CAD) critical. This project implements a robust machine learning pipeline using the **LIDC-IDRI** dataset (1018 patients) to distinguish between **Benign** and **Malignant** pulmonary nodules.
+## 📋 Project Overview
+**LungRadiomics** is a machine learning pipeline designed to assist in the early diagnosis of lung cancer. Unlike traditional Deep Learning approaches that operate as "black boxes," this project leverages **Radiomics**, the extraction of quantifiable mathematical features (shape, texture, intensity) from medical images, to classify pulmonary nodules as **Benign** or **Malignant**.
 
-Unlike standard CNN approaches, this project focuses on **Radiomics**,extracting quantifiable shape and texture features (2D and 3D) from CT scans, and rigorously testing feature selection strategies to maximize model explainability and performance.
+The system processes **CT Scans**, segments nodules in 2D/3D space, and applies statistical feature selection to train interpretable classifiers.
 
 ---
 
-## 📈 Executive Performance Summary
-The study compared three classifiers (SVM, Random Forest, XGBoost) across four feature selection techniques (Lasso, PCA, t-test, correlation).
+## 🏆 Key Results (Executive Summary)
+The model was evaluated using accuracy and **Recall (Sensitivity)**, identifying Malignancy with high confidence to minimize False Negatives in a clinical setting.
 
-| Model Architecture | Feature Selection | Dimensionality | Test Accuracy | Recall (Sensitivity) |
+| Model | Feature Selection | Dimensionality | **Accuracy** | **Recall (Sensitivity)** |
 | :--- | :--- | :--- | :--- | :--- |
-| **XGBoost** | **t-test (p<0.005)** | **2D Features** | **~82%** | **0.91** |
-| Random Forest | Lasso (L1) | 3D Features | ~79% | 0.88 |
-| SVM (RBF) | PCA (95% Var) | 2D Features | ~75% | 0.84 |
+| **XGBoost** | **t-test (p < 0.005)** | **2D Radiomics** | **82%** | **0.91** |
+| Random Forest | Lasso (L1) | 3D Radiomics | 79% | 0.88 |
+| SVM (RBF) | PCA (95% Var) | 2D Radiomics | 75% | 0.84 |
 
-**Key Takeaway:** While 3D volumetric features provide spatial depth, **2D features selected via statistical t-tests combined with XGBoost** yielded the most robust balance of Accuracy and Sensitivity (Recall)—a crucial metric in medical diagnosis to minimize false negatives.
-
----
-
-## 🔬 Technical Deep Dive
-
-### 1. Data Pipeline & Preprocessing
-* **Annotation Clustering:** Used `pylidc` to aggregate annotations from 4 radiologists. Nodules with a malignancy score of 3 (indeterminate) were grouped with malignant cases (4-5) to adopt a conservative, high-sensitivity approach.
-* **Hounsfield Unit (HU) Normalization:** CT scans were normalized to standard lung window ranges to ensure pixel intensity consistency.
-* **Segmentation:** Generated dynamic masks for both 2D slices and 3D volumes to isolate nodule ROI (Region of Interest).
-
-### 2. Feature Engineering (PyRadiomics)
-Extracted **100+ radiomic features** per nodule, categorized into:
-* **Shape:** Sphericity, Elongation, Surface Area.
-* **First-Order Statistics:** Mean, Skewness, Kurtosis, Entropy.
-* **Texture (GLCM/GLRLM):** Contrast, Correlation, Gray Level Non-Uniformity.
-
-### 3. Feature Selection Strategy
-To cure the "Curse of Dimensionality," I implemented independent selection pipelines:
-* **Lasso (L1):** Penalized regression to zero-out irrelevant coefficients.
-* **PCA:** Reduced dimensions while retaining 95% variance.
-* **Statistical t-test:** Filtered features with $p < 0.005$ between classes.
+> **Clinical Insight:** The XGBoost model achieved the highest sensitivity (0.91), meaning it successfully identified 91% of malignant cases, making it the most viable candidate for a medical screening support tool.
 
 ---
 
+## 📂 Dataset & Access
+This project utilizes the **LIDC-IDRI (Lung Image Database Consortium)** dataset, consisting of diagnostic and lung cancer screening thoracic CT scans with marked-up annotated lesions.
 
-**Analysis:**
-* **Spiculation** and **Lobulation** emerged as top predictors for malignancy, aligning with established radiological markers.
-* **Calcification** showed a strong inverse correlation with malignancy (highly calcified nodules are often benign).
+* **Source:** The Cancer Imaging Archive (TCIA)
+* **Collection:** [LIDC-IDRI Collection URL](https://www.cancerimagingarchive.net/collection/lidc-idri/)
+* **Size:** ~1018 patients (120GB+)
+* **License:** Creative Commons Attribution 3.0 Unported
+
+**⚠️ Note:** Due to the size and licensing of the dataset, the raw DICOM images are **not** included in this repository. You must download the dataset using the NBIA Data Retriever or the `pylidc` library API.
 
 ---
 
-## 🛠️ Installation & Usage
+## ⚙️ Methodology & Pipeline
 
-### 1. Clone & Setup
-```bash
-git clone [https://github.com/YourUsername/PulmoRad-ML.git](https://github.com/YourUsername/PulmoRad-ML.git)
-cd PulmoRad-ML
-pip install -r requirements.txt
+The project follows the **CRISP-DM** methodology across four stages:
+
+1.  **Data Ingestion & Cleaning:**
+    * Parsing DICOM metadata using `pylidc`.
+    * Handling missing values and filtering patients with 0 nodules.
+    * **Risk Mapping:** Indeterminate malignancy scores (3/5) were mapped to "Malignant" to prioritize patient safety.
+2.  **Preprocessing:**
+    * Conversion to **Hounsfield Units (HU)** for density standardization.
+    * 2D and 3D Segmentation of nodule volumes.
+3.  **Feature Extraction (Radiomics):**
+    * Extraction of Shape (Sphericity, Compactness), Texture (GLCM, GLRLM), and Intensity (Histogram) features.
+4.  **Modeling:**
+    * Comparison of SVM, Random Forest, and XGBoost.
+    * Hyperparameter tuning via Grid Search.
+
+---
+
+## 💻 Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/pedrooamaroo/PulmoRad-ML.git](https://github.com/pedrooamaroo/PulmoRad-ML.git)
+    cd PulmoRad-ML
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+3.  **Run the Notebook:**
+    Launch Jupyter to explore the analysis pipeline:
+    ```bash
+    jupyter notebook "Lung_Cancer_Radiomics.ipynb"
+    ```
