@@ -1,4 +1,4 @@
-# 🫁 PulmoRad-ML: 2D/3D Radiomic Lung Nodule Classification
+# 🫁 LungRadiomics: 2D/3D Radiomic Lung Nodule Classification
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
 [![PyRadiomics](https://img.shields.io/badge/PyRadiomics-Feature_Extraction-orange.svg)](https://pyradiomics.readthedocs.io/)
