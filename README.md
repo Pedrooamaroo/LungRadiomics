@@ -8,7 +8,7 @@
 ## 🎯 Project Overview
 Lung cancer remains a leading cause of mortality, making early detection via Computer-Aided Diagnosis (CAD) critical. This project implements a robust machine learning pipeline using the **LIDC-IDRI** dataset (1018 patients) to distinguish between **Benign** and **Malignant** pulmonary nodules.
 
-Unlike standard CNN approaches, this project focuses on **Radiomics**—extracting quantifiable shape and texture features (2D and 3D) from CT scans—and rigorously testing feature selection strategies to maximize model explainability and performance.
+Unlike standard CNN approaches, this project focuses on **Radiomics**,extracting quantifiable shape and texture features (2D and 3D) from CT scans, and rigorously testing feature selection strategies to maximize model explainability and performance.
 
 ---
 
@@ -46,11 +46,6 @@ To cure the "Curse of Dimensionality," I implemented independent selection pipel
 
 ---
 
-## 📊 Visual Insights
-
-| Feature Importance (XGBoost) | 3D Segmentation Mesh |
-| :--- | :--- |
-| <img src="images/feature_importance.png" width="400" alt="Feature Importance Plot"> | <img src="images/3d_mesh.png" width="400" alt="3D Nodule Mesh"> |
 
 **Analysis:**
 * **Spiculation** and **Lobulation** emerged as top predictors for malignancy, aligning with established radiological markers.
